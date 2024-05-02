@@ -47,11 +47,22 @@ module PgVerify
             # Calls NuSMV to calculate a possible state trace.
             # Returns an array of states, where each state is a hash from
             # variable to the value of that variable in that state
-            def run_simulation(program_graph, steps, random: false)
+            def run_simulation(program_graph, steps, random: true, disable_faults: false)
+                #TODO: random parameter no longer used, possibly remove
+              #Random seed doesn't always seem to work very well, e.g. for the example pressure tank without faults, the switch will always be pushed at the same time. Unclear why. With faults, things are more random.
+              
+                if disable_faults
+                  program_graph.fault_components.each {|c| c.transitions = [] }
+                end
                 commands = []
                 commands << "go"
-                commands << "pick_state #{random ? '-r' : ''}"
-                commands << "simulate -k #{steps.to_s.to_i} -v #{random ? '-r' : ''}"
+                #commands << "simulate -k #{steps.to_s.to_i} -v #{random ? '-r' : ''}"
+                #workaround to get something close to a random seed in NuSMV 
+                #(https://stackoverflow.com/questions/45384144/nusmv-simulation-using-random-traces)
+                commands << "pick_state -r"
+                commands << "simulate -r -k #{rand(1..99)}"
+                commands << "pick_state -r"
+                commands << "simulate -r -v -k #{steps.to_s.to_i}"
                 commands << "quit"
                 nusmv_s = Transform::NuSmvTransformation.new.transform_graph(program_graph)
                 output = eval_nusmv(nusmv_s, commands: commands)

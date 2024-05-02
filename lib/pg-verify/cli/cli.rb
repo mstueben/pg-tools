@@ -197,7 +197,8 @@ module PgVerify
             method_option :"yaml-file", :type => :string
             method_option :steps, :type => :numeric, default: 10
             method_option :force, :type => :numeric, default: 10
-            method_option :random, :type => :boolean, default: false
+            method_option :random, :type => :boolean, default: true
+            method_option :"with-faults", :type => :boolean, default: false
             method_option :png, :type => :boolean, default: false
             # Hide labels or parts of labels
             method_option :"hide-labels", :type => :boolean, default: false
@@ -221,7 +222,7 @@ module PgVerify
                     }
 
                     trace = Shell::LoadingPrompt.while_loading("Simulating model #{model.name.to_s.c_string}") {
-                        runner.run_simulation(model, options[:steps], random: options[:random])
+                        runner.run_simulation(model, options[:steps], random: options[:random], disable_faults: (not options[:"with-faults"]))
                     }
 
                     # Print the trace
