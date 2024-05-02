@@ -33,6 +33,7 @@ module PgVerify
                     states(*all_states)
                     all_states.product(all_states).each { |s1, s2| transition({ s1 => s2}) }
                 end
+                cmp.init_expressions = [ "#{name} == No" ]
                 cmp.represents_fault = true
                 return cmp
             end
@@ -43,6 +44,7 @@ module PgVerify
                     transition :No => :No
                     transition :No => :Yes
                 end
+                cmp.init_expressions = [ "#{name} == No" ]
                 cmp.represents_fault = true
                 return cmp
             end
