@@ -190,8 +190,9 @@ module PgVerify
                 constants = expression.word_tokens.select { |w| varset.values.include?(w) }.uniq
 
                 expression_tokens = expression.tokenize
-
+ 
                 variables.each { |v| expression_tokens = expression_tokens.gsub(v.to_s, "v." + transform_varname(v))  }
+
                 constants.each { |c| expression_tokens = expression_tokens.gsub(c.to_s, transform_const(c))  }
 
                 expression_tokens = expression_tokens.gsub('&&', '&')
@@ -202,7 +203,6 @@ module PgVerify
                 expression_tokens = expression_tokens.gsub('<=>', '<->')
 
                 expression_s = expression_tokens.join(" ")
-
                 return expression_s
             end
 
