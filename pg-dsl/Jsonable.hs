@@ -1,3 +1,7 @@
+{-# LANGUAGE TypeSynonymInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE InstanceSigs #-}
+
 module Jsonable
   ( Jsonable(toJson)
   ) where

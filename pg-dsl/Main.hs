@@ -21,6 +21,7 @@ import           System.FilePath           (takeDirectory)
 import           System.Process            (createProcess, proc, waitForProcess)
 import           Tokenizer                 (tokenize)
 import           TypeCheck                 (checkTypes)
+import           System.Console.CmdArgs
 
 main :: IO ()
 main = do
