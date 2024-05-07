@@ -90,7 +90,7 @@ checkSpecs env (Spec _ (Right ctl):t) =
 checkPG :: Env -> PG -> Maybe String
 checkPG env pg =
   case checkF env (name pg) (initialFormula pg) of
-    Nothing -> checkTransitions env (name pg) $ transitions pg
+    Nothing -> if isFault pg then Nothing else checkTransitions env (name pg) $ transitions pg
     err     -> err
 
 checkTransitions :: Env -> String -> [Trans] -> Maybe String
@@ -100,11 +100,28 @@ checkTransitions env n (tr:trs) =
     Nothing -> checkTransitions env n trs
     err     -> err
 
+checkState :: Env -> String -> String -> Maybe String
+checkState env n s =
+   if s `elem` states then Nothing else raiseUndefState n s
+    where states = case (Map.lookup n (eGraph env)) of
+                           Nothing -> []
+                           Just s -> s
+
+checkTransitionPreState :: Env -> String -> Trans -> Maybe String
+checkTransitionPreState env n tr = checkState env n (preState tr)
+
+checkTransitionPostState :: Env -> String -> Trans -> Maybe String
+checkTransitionPostState env n tr = checkState env n (postState tr)
+
 checkTrans :: Env -> String -> Trans -> Maybe String
 checkTrans env n tr =
-  case checkF env n (guard tr) of
-    Nothing -> checkAction env n $ action tr
-    err     -> err
+  case checkTransitionPreState env n tr of
+    Nothing -> case checkTransitionPostState env n tr of
+                    Nothing -> case checkF env n (guard tr) of
+                                      Nothing -> checkAction env n $ action tr
+                                      err     -> err
+                    err -> err
+    err -> err
 
 checkAction :: Env -> String -> Action -> Maybe String
 checkAction env n (Action []) = Nothing
@@ -324,6 +341,9 @@ raiseDef fp v = fp ++ ":  " ++ v ++ " was already defined somewhere else"
 
 raiseUndef :: FilePath -> String -> Maybe String
 raiseUndef fp v = Just $ fp ++ ": tried to reference undefined variable " ++ v
+
+raiseUndefState :: FilePath -> String -> Maybe String
+raiseUndefState fp v = Just $ fp ++ ": tried to reference undefined state " ++ v
 
 raiseType :: FilePath -> String -> String -> Maybe String
 raiseType fp v t = Just $ fp ++ ": " ++ v ++ " is not of type " ++ t
