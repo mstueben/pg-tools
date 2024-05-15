@@ -173,9 +173,30 @@ module PgVerify
                 return output
             end
 
+
+
             def find_nusmv_path
                 # Return by settings path if that exists
                 return Settings.nusmv.path if !Settings.nusmv.path.blank? && File.file?(Settings.nusmv.path)
+
+                # https://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
+                # Cross-platform way of finding an executable in the $PATH.
+                #
+                #   which('ruby') #=> /usr/bin/ruby
+                def which(cmd)
+                  exts = ENV['PATHEXT'] ? ENV['PATHEXT'].split(';') : ['']
+                  ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
+                    exts.each do |ext|
+                      exe = File.join(path, "#{cmd}#{ext}")
+                      return exe if File.executable?(exe) && !File.directory?(exe)
+                    end
+                  end
+                  nil
+                end
+
+                # Return NuSMV from $PATH if that exists
+                w = which('NuSMV')
+                return w if !w.nil? && !w.blank?
 
                 # Fall back to looking in the addon directory
                 candidates = Dir[File.join(PgVerify.addon_dir, "*", "bin", "NuSMV*")]

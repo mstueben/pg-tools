@@ -15,7 +15,6 @@ module PgVerify
             # TODO: not sure whether I can use paramter with to_s?
             def to_s(include_steps: true, hide_faults: true)
                 return "No states in trace" if @states.empty?
-                puts hide_faults
                 # Get all variables (TODO: Bring into sensible order)
                 vars = @states.first.keys
                 state_vars = @model.state_variables()

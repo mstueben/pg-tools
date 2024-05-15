@@ -66,8 +66,8 @@ cmdHandler (Test pgDir) jsonFile = do
   _ <- waitForProcess processHandle
   putStrLn ""
 cmdHandler (Simulate pgDir steps withFaults) jsonFile = do
-  let s = if (steps > 0) then steps else 1
-  putStrLn $ "Simulating program graphs from folder " ++ pgDir ++ " for " ++ (show steps) ++ " steps."
+  let s = if (steps > 1) then steps else 10
+  putStrLn $ "Simulating program graphs from folder " ++ pgDir ++ " for " ++ (show s) ++ " steps."
   putStrLn $ "Faults are " ++ (if withFaults then "included." else "excluded.")
   let cmd = ["simulate"]
   let jsonArgs = ["--json-file", jsonFile]
@@ -122,7 +122,6 @@ main :: IO ()
 main = do
   raw_args <- getArgs
   carg <- (if null raw_args then withArgs ["--help"] else id) $ cmdArgs (modes [test, output, dcca, simulate])
-  print carg
   let basepath = pgDirectory carg
   main_exists <- hasMain basepath
   when (not main_exists) $ putStrLn "Error: Given directory does not contain a main.pg file" >> exitWith (ExitFailure 1)
