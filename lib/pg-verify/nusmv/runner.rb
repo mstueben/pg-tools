@@ -166,7 +166,7 @@ module PgVerify
                 else
                     tmp_cmd_file = PgVerify.tmp_file("nusmv_commands")
                     File.write(tmp_cmd_file, commands.join("\n"))
-                    nusmv_cmd = "#{nusmv_path} -source '#{tmp_cmd_file}' #{file}"
+                    nusmv_cmd = "#{nusmv_path} -source \"#{tmp_cmd_file}\" \"#{file}\""
                 end
                 output, err, status = Open3.capture3({}, nusmv_cmd)
                 raise RawNuSMVError.new(nusmv_cmd, output, err, status, file) unless status.success?
@@ -188,7 +188,7 @@ module PgVerify
                   ENV['PATH'].split(File::PATH_SEPARATOR).each do |path|
                     exts.each do |ext|
                       exe = File.join(path, "#{cmd}#{ext}")
-                      return ("'" + exe + "'").gsub(' ', '\\ ') if File.executable?(exe) && !File.directory?(exe)
+                      return ('"' + exe + '"') if File.executable?(exe) && !File.directory?(exe)
                     end
                   end
                   nil
