@@ -44,7 +44,7 @@ module PgVerify
         def self.check_01_Can_find_NuSMV()
             return [] unless PgVerify::NuSMV::Runner.new.find_nusmv_path.nil?
             return Warning.new("Unable to locate the NuSMV executable", 
-                "Make sure to install NuSMV by unpacking it and placing the entire folder into\n" \
+                "Make sure to install NuSMV by unpacking it, and adding the file bin/NuSMV to your PATH, or placing the entire folder into\n" \
                 "the #{'addon'.c_file} directory of your project. " \
                 "(#{File.expand_path('addon').c_sidenote})\n" \
                 "Alternatively you can set the #{'nusmv.path'.c_string} in the configuration."
