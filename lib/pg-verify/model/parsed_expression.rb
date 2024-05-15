@@ -53,7 +53,7 @@ module PgVerify
             # Splits the expression string into an array of tokens. e.g:
             # "(a == b) && 3 >= 2" becomes [ "(", "a", "==", "b", ")", "&&", "3", ">=", "2" ]
             def tokenize()
-              return expression_string.split(/\s+|\(|\)/).flatten.reject(&:blank?)
+              return expression_string.split(/(\s+|\(|\))/) #.flatten.reject(&:blank?)
             end
 
             def to_s()
