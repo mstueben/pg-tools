@@ -49,7 +49,7 @@ module PgVerify
 
                 spec_set = SpecSet.wrap(specs)
                 @graph.specification = Specification.new([spec_set])
-                
+
                 results = @runner.run_specs(@graph)
 
                 critical_sets = []

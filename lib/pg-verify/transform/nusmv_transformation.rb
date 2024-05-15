@@ -136,7 +136,7 @@ module PgVerify
 
                 # Handle composite actions (a := 1 | b := 2) by recursively transforming
                 # the individual actions and then combining them
-                sub_assignments = assignment_expression.to_s.split("|")
+                sub_assignments = assignment_expression.to_s.split(";")
                 if sub_assignments.length > 1
                     action_s_acc, assigned_vars_acc = [], []
                     sub_assignments = sub_assignments.map { |a|
@@ -179,7 +179,7 @@ module PgVerify
                 expression.word_tokens.select { |w| 
                     if varset.names.include?(w)
                         variables << w
-                    elsif  varset.values.include?(w)
+                    elsif  varset.values.map{|v| v.to_s}.include?(w.to_s)
                         constants << w
                     else
                         raise Model::Validation::UnknownTokenError.new(w, expression, varset)
@@ -187,7 +187,7 @@ module PgVerify
                 }
                 variables, constants = variables.uniq, constants.uniq
 
-                constants = expression.word_tokens.select { |w| varset.values.include?(w) }.uniq
+                #constants = expression.word_tokens.select { |w| varset.values.include?(w) }.uniq
 
                 expression_tokens = expression.tokenize
  
