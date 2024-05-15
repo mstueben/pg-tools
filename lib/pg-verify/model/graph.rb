@@ -37,6 +37,20 @@ module PgVerify
                 return VariableSet.new(*vars)
             end
 
+            def state_variables_excluding_faults()
+              vars = @components.reject(&:represents_fault?).map { |cmp|
+                    Variable.new(cmp.name, cmp.states, cmp.name, cmp.source_location)
+                }
+                return VariableSet.new(*vars)
+            end
+
+            def fault_state_variables()
+              vars = @components.select(&:represents_fault?).map { |cmp|
+                    Variable.new(cmp.name, cmp.states, cmp.name, cmp.source_location)
+                }
+                return VariableSet.new(*vars)
+            end
+
             # Returns all variables used in this graph including state variables
             def all_variables()
                 return state_variables() + @variables

@@ -12,15 +12,20 @@ module PgVerify
                 @loop_index = loop_index
             end
 
-            def to_s(include_steps: true)
+            # TODO: not sure whether I can use paramter with to_s?
+            def to_s(include_steps: true, hide_faults: true)
                 return "No states in trace" if @states.empty?
+                puts hide_faults
                 # Get all variables (TODO: Bring into sensible order)
                 vars = @states.first.keys
                 state_vars = @model.state_variables()
+                fault_state_vars = @model.fault_state_variables()
 
                 parts = vars.map { |var| 
+                  if (fault_state_vars.varname?(var) && hide_faults) then "" else 
                     var_string = state_vars.varname?(var) ? var.to_s.c_state.c_bold : var.to_s.c_string
                     var_string + "\n" + @states.each_with_index.map{ |state, index| value_str(var, state[var], index) }.join("\n")
+                  end
                 }
                 str = "Step".c_num.c_bold + "\n" + (0...@states.length).map { |i| "#{i + 1}" } .join("\n")
                 str = "" unless include_steps

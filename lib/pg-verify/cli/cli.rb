@@ -226,7 +226,7 @@ module PgVerify
                     }
 
                     # Print the trace
-                    puts trace.to_s
+                    puts trace.to_s(include_steps: true, hide_faults: (not options[:"with-faults"]))
 
                     next unless options[:png]
 
