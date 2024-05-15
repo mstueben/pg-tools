@@ -27,7 +27,7 @@ Let's assume we wish to model a robot which works depending on the state of a li
 
 ### Project structure
 
-A pg-dsl project always expects a `main.pg` file on your project's top level. This file contains a model's error graphs, plausibility checks, and hazards. What's more, a model may contain arbitrarily many program graphs. Each program graph has to be specified in a separate file. A program graph file ends with `.pg` and can have an arbitrary name apart from that. It's recommended, though, to name the files after the graph names, i.e., when you have the two graphs *Robot* and *LightBarrier*, your files are best named `robot.pg` and `lightBarrier.pg`. These files can be arbitrarily nested within your project. The compiler finds them automatically. Therefore, a possible directory structure is the following.
+A pg-dsl project always expects a `main.pg` file on your project's top level. This file contains a model's fault graphs, plausibility checks, and hazards. What's more, a model may contain arbitrarily many program graphs. Each program graph has to be specified in a separate file. A program graph file ends with `.pg` and can have an arbitrary name apart from that. It's recommended, though, to name the files after the graph names, i.e., when you have the two graphs *Robot* and *LightBarrier*, your files are best named `robot.pg` and `lightBarrier.pg`. These files can be arbitrarily nested within your project. The compiler finds them automatically. Therefore, a possible directory structure is the following.
 ```
 .
 ├── graphs
@@ -44,7 +44,7 @@ model Robot {
 
 }
 ```
-The `main.pg` file always starts with the keyword `model`, followed by the name of the model - in this case `Robot`. The model's name has to start with an upper case letter. In general, all variable names may only contain roman letters, numbers, and underscores and have to start with a letter. To separate language constructs from each other, we use curly brackes. Line breaks and additional whitespaces will always be ignored by the compiler. The specification of error graphs, plausibility checks, and hazards is saved for later as it builds upon the error graphs which will be introduced next.
+The `main.pg` file always starts with the keyword `model`, followed by the name of the model - in this case `Robot`. The model's name has to start with an upper case letter. In general, all variable names may only contain roman letters, numbers, and underscores and have to start with a letter. To separate language constructs from each other, we use curly brackes. Line breaks and additional whitespaces will always be ignored by the compiler. The specification of fault graphs, plausibility checks, and hazards is saved for later as it builds upon the fault graphs which will be introduced next.
 
 ### Modelling a program graph - overview
 
@@ -188,23 +188,23 @@ model Robot {
 
 Each specification begins with a name; this name is defined within quotation marks so that you can use as many white spaces as you wish. After the name, the actual specification follows once again in curly brackets. You can define specifications either in linear temporal logic (LTL) or computation tree logic (CTL). You can of course add arbitrarily many specifications after each other.
 
-### The main file - error graphs
+### The main file - fault graphs
 
-We now want to be able to check what happens when parts of the system don't work as expected. This way, we can guarantee the whole system is still operable when single parts fail. We do this using error graphs. As they always have the same strucure, there's no need for you to define them as real graphs in separate files; you can instead define them directly in the main file within the `errors` block.
+We now want to be able to check what happens when parts of the system don't work as expected. This way, we can guarantee the whole system is still operable when single parts fail. We do this using fault graphs. As they always have the same structure, there's no need for you to define them as real graphs in separate files; you can instead define them directly in the main file within the `faults` block.
 
 ```
 model Robot {
-    errors {
-        persistent PersistentError
-        transient TransientError
+    faults {
+        persistent PersistentFault
+        transient TransientFault
     }
 }
 ```
 
-As you see, defining an error graph is as simple as deciding between `persistent` and `transient` errors and given the graph a name. In the background, a persistent error looks like this
+As you see, defining a fault graph is as simple as deciding between `persistent` and `transient` faults and given the graph a name. In the background, a persistent fault looks like this
 
 ```
-graph PersistentError {
+graph PersistentFault {
     states { No, Yes }
 
     init: No {}
@@ -216,10 +216,10 @@ graph PersistentError {
     }
 }
 ```
-and a transient error like this.
+and a transient fault like this.
 
 ```
-graph TransientError {
+graph TransientFault {
     states { No, Yes }
 
     init: No {}
@@ -233,7 +233,7 @@ graph TransientError {
 }
 ```
 
-We can now use these error graphs within our other graphs as we had defined them explicitly like above.
+We can now use these fault graphs within our other graphs as we had defined them explicitly like above.
 
 ```
 graph Robot {
@@ -264,26 +264,26 @@ graph Robot {
         }
 
         Inactive -> Idle {
-            guard { PersistentError != No }
+            guard { PersistentFault != No }
         }
     }
 }
 ```
 
-We have just defined a new transition for the graph `Robot` which leads from `Inactive` to `Idle` and may be triggered only when `PersistentError` is not in state `No`.
+We have just defined a new transition for the graph `Robot` which leads from `Inactive` to `Idle` and may be triggered only when `PersistentFault` is not in state `No`.
 
-In our plausibility checks, we always have the keyword `nofaults` available. This keywords always evaluates to an expression where all error graphs are in the state `No`, in this case to
+In our plausibility checks, we always have the keyword `nofaults` available. This keywords always evaluates to an expression where all fault graphs are in the state `No`, in this case to
 
 ```
-PersistentError = No & TransientError = No
+PersistentFault = No & TransientFault = No
 ```
 
-This comes in handy when you want to execute the plausibility checks under the assumption that no errors ever occur:
+This comes in handy when you want to execute the plausibility checks under the assumption that no faults ever occur:
 
 ```
 model Robot {
-    errors {
-        persistent Errorgraph
+    faults {
+        persistent Faultgraph
     }
 
     specify {
@@ -301,8 +301,8 @@ Hazards in program graphs are model states we want to avoid under all circumstan
 
 ```
 model Robot {
-    errors {
-        persistent Errorgraph
+    faults {
+        persistent Faultgraph
     }
 
     hazards {

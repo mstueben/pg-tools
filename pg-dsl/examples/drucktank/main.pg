@@ -1,5 +1,5 @@
 model Drucktank {
-    errors {
+    faults {
         transient FS1
         persistent FK1
         persistent FK2

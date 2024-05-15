@@ -136,7 +136,7 @@ instance Show Token where
   show TTrue        = "'true'"
   show TFalse       = "'false'"
   show TModel       = "'model'"
-  show TErrors      = "'errors'"
+  show TErrors      = "'faults'"
   show TTransient   = "'transient'"
   show TPersistent  = "'persistent'"
   show THazards     = "'hazards'"

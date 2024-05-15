@@ -1,6 +1,6 @@
 model Robot {
     # Stoerungen
-    errors {
+    faults {
         persistent Errorgraph
     }
 

@@ -122,7 +122,7 @@ tok acc l c p@('f':'a':'l':'s':'e':t)
 tok acc l c p@('m':'o':'d':'e':'l':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TModel l c : acc) l (c + 5) t
-tok acc l c p@('e':'r':'r':'o':'r':'s':t)
+tok acc l c p@('f':'a':'u':'l':'t':'s':t)
   | nextAlphaNum t = tokLower acc l c p
   | otherwise = tok (dec TErrors l c : acc) l (c + 6) t
 tok acc l c p@('t':'r':'a':'n':'s':'i':'e':'n':'t':t)
