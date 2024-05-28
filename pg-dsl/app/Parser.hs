@@ -667,7 +667,7 @@ pTerm = pt1 [] []
     pt1 terms ops p@(h:t) =
       case token h of
         TBracketL ->
-          case pTerm p of
+          case pTerm t of
             Right (te, h':t') ->
               case token h' of
                 TBracketR -> pt2 (te : terms) ops t'
