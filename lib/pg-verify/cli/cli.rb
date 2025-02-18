@@ -47,6 +47,7 @@ module PgVerify
             method_option :"hide-precons", :type => :boolean, default: false
             method_option :"hide-guards", :type => :boolean, default: false
             method_option :"hide-actions", :type => :boolean, default: false
+            method_option :"single-file", :type => :boolean, default: false
             def png()
                 render_options = {
                     render_labels: !options[:"hide-labels"],
@@ -57,16 +58,29 @@ module PgVerify
 
                 models = CliUtils.load_models(options)
 
-                models.each { |model|
-                    components = self.class.select_components(options[:only], options[:hide], model)
+                # TODO create a setting for plantuml url
+                if options[:"single-file"] then models.each { |model|
                     puml = Transform::PumlTransformation.new(render_options).transform_graph(model, only: components)
-                    png = PlantumlBuilder::Formats::PNG.new(puml).load
+                    png = PlantumlBuilder::Formats::PNG.new(puml, 'http://localhost:8080').load
                     out_name = model.name.to_s.gsub(/\W+/, '_').downcase + ".png"
                     out_path = File.expand_path(out_name, Settings.outdir)
                     FileUtils.mkdir_p(Settings.outdir)
                     File.binwrite(out_path, png)
                     puts "Wrote #{out_path.c_file}"
                 }
+                else models.each { |model|
+                    components = self.class.select_components(options[:only], options[:hide], model)
+                    components.each {|component|
+                        puml = Transform::PumlTransformation.new(render_options).transform_graph(model, only: [component])
+                        png = PlantumlBuilder::Formats::PNG.new(puml, 'http://localhost:8080').load
+                        out_name = component.name.to_s.gsub(/\W+/, '_').downcase + ".png"
+                        out_path = File.expand_path(out_name, Settings.outdir)
+                        FileUtils.mkdir_p(Settings.outdir)
+                        File.binwrite(out_path, png)
+                        puts "Wrote #{out_path.c_file}"
+                    }
+                }
+                end
             end
 
             desc "yaml", "Shows the model in YAML format"
