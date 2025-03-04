@@ -29,7 +29,7 @@ data OutputType = PNG | PUML | JSON | YAML | NuSMV deriving (Show, Data)
 data PgDSL = Test  {pgDirectory :: FilePath } |
               Simulate {pgDirectory :: FilePath, steps :: Int, withFaults :: Bool} |
               DCCA {pgDirectory :: FilePath } |
-              Output {pgDirectory :: FilePath, outputType :: OutputType}
+              Output {pgDirectory :: FilePath, outputType :: OutputType, showPrecons :: Bool}
               deriving (Show, Data, Typeable)
 
 -- weird bug requires different typ for each instance of pgDirectory.. 
@@ -50,6 +50,7 @@ simulate = Simulate {
 
 output = Output {
   outputType = PNG &= help "Output format type" &= typ "[png,puml,json,yaml,nusmv]",
+  showPrecons = def &= help "Whether to include the (auto-generated) preconditions in the output.",
   pgDirectory = def &= typ " Path " &= opt "." &= args
 }
 
@@ -83,11 +84,13 @@ cmdHandler (DCCA pgDir) jsonFile = do
   (_, _, _, processHandle) <- createProcess (shell $ "pg-verify " ++ cmd ++ " " ++ (unwords jsonArgs))
   _ <- waitForProcess processHandle
   putStrLn ""
-cmdHandler (Output pgDir typ) jsonFile = do
+cmdHandler (Output pgDir typ showPrecons) jsonFile = do
   putStrLn $ "Showing program graphs from folder " ++ pgDir ++ " as " ++ (show typ)
+  putStrLn $ "Auto-generated preconditions are " ++ (if showPrecons then "shown." else "hidden.")
   let cmd = (unwords ["show", map toLower (show typ)])
   let jsonArgs = ["--json-file", jsonFile]
-  (_, _, _, processHandle) <- createProcess (shell $ "pg-verify " ++ cmd  ++ " " ++ (unwords jsonArgs))
+  let preconsArg = if showPrecons then ["--no-hide-precons"] else ["--hide-precons"]
+  (_, _, _, processHandle) <- createProcess (shell $ "pg-verify " ++ cmd  ++ " " ++ (unwords $ jsonArgs ++ preconsArg))
   _ <- waitForProcess processHandle
   putStrLn ""
 
@@ -128,27 +131,6 @@ main = do
   jsonFile <- pgModelToJson basepath
   cmdHandler carg jsonFile
   exitSuccess
-
-parseArgs :: [String] -> (FilePath, [String])
-parseArgs [] = (".", [])
-parseArgs [x]
-  | x `elem` ["-t", "--test"] = (".", ["test"])
-  | x `elem` ["-s", "--simulate"] = (".", ["simulate"])
-  | x `elem` ["-d", "--dcca"] = (".", ["dcca"])
-  | notDash x = (x, [])
-parseArgs [x, y]
-  | x `elem` ["-t", "--test"] && notDash y = (y, ["test"])
-  | x `elem` ["-s", "--simulate"] && notDash y = (y, ["simulate"])
-  | x `elem` ["-d", "--dcca"] && notDash y = (y, ["dcca"])
-  | x `elem` ["-o", "--show"] && y `elem` ["puml", "json", "yaml"] =
-    (".", ["show", y])
-  | x `elem` ["-o", "--show"] && y == "png" =
-    (".", ["show", y, "--hide-precons"])
-parseArgs [x, y, z]
-  | x `elem` ["-o", "--show"] && y `elem` ["puml", "json", "yaml"] && notDash z =
-    (z, ["show", y])
-  | x `elem` ["-o", "--show"] && y == "png" = (z, ["show", y, "--hide-precons"])
-parseArgs x = ("", ["err"])
 
 notDash :: String -> Bool
 notDash [] = False
